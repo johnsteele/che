@@ -13,6 +13,7 @@ package org.eclipse.che.api.system.shared.dto;
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -23,6 +24,15 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 @EventOrigin("system")
 public interface SystemStatusChangedEventDto extends SystemEventDto {
+
+    /** Creates dto from event. */
+    static SystemStatusChangedEventDto fromEvent(SystemStatusChangedEvent event) {
+        SystemStatusChangedEventDto dto = DtoFactory.newDto(SystemStatusChangedEventDto.class);
+        dto.setType(event.getType());
+        dto.setStatus(event.getStatus());
+        dto.setPrevStatus(event.getPrevStatus());
+        return dto;
+    }
 
     /** Returns new status of the system. */
     SystemStatus getStatus();

@@ -10,11 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.system.server;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.system.shared.dto.SystemServiceItemStoppedEventDto;
 import org.eclipse.che.api.system.shared.dto.SystemEventDto;
+import org.eclipse.che.api.system.shared.dto.SystemServiceEventDto;
 import org.eclipse.che.api.system.shared.dto.SystemStatusChangedEventDto;
+import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.api.system.shared.event.SystemEvent;
+import org.eclipse.che.api.system.shared.event.service.SystemServiceEvent;
 import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.websockets.WSConnectionContext;
@@ -34,6 +40,16 @@ public class SystemEventsWebsocketBroadcaster implements EventSubscriber<SystemE
 
     public static final String SYSTEM_STATE_CHANNEL_NAME = "system:state";
 
+    private final MessageSender messageSender;
+
+    public SystemEventsWebsocketBroadcaster() {
+        this(new WebsocketMessageSender());
+    }
+
+    public SystemEventsWebsocketBroadcaster(MessageSender messageSender) {
+        this.messageSender = messageSender;
+    }
+
     @Inject
     public void subscribe(EventService eventService) {
         eventService.subscribe(this);
@@ -41,11 +57,8 @@ public class SystemEventsWebsocketBroadcaster implements EventSubscriber<SystemE
 
     @Override
     public void onEvent(SystemEvent event) {
-        ChannelBroadcastMessage message = new ChannelBroadcastMessage();
-        message.setBody(DtoFactory.getInstance().toJson(asDto(event)));
-        message.setChannel(SYSTEM_STATE_CHANNEL_NAME);
         try {
-            WSConnectionContext.sendMessage(message);
+            messageSender.sendMessage(SYSTEM_STATE_CHANNEL_NAME, DtoFactory.getInstance().toJson(asDto(event)));
         } catch (Exception x) {
             LoggerFactory.getLogger(getClass()).error(x.getMessage(), x);
         }
@@ -54,13 +67,41 @@ public class SystemEventsWebsocketBroadcaster implements EventSubscriber<SystemE
     private static SystemEventDto asDto(SystemEvent event) {
         switch (event.getType()) {
             case STATUS_CHANGED:
-                SystemStatusChangedEvent statusChanged = (SystemStatusChangedEvent)event;
-                return DtoFactory.newDto(SystemStatusChangedEventDto.class)
-                                 .withStatus(statusChanged.getStatus())
-                                 .withPrevStatus(statusChanged.getPrevStatus())
-                                 .withType(statusChanged.getType());
+                return SystemStatusChangedEventDto.fromEvent((SystemStatusChangedEvent)event);
+            case SERVICE_ITEM_STOPPED:
+                return SystemServiceItemStoppedEventDto.fromEvent((SystemServiceItemStoppedEvent)event);
+            case SERVICE_STOPPED:
+            case STOPPING_SERVICE:
+                return SystemServiceEventDto.fromEvent((SystemServiceEvent)event);
             default:
-                throw new IllegalArgumentException("Can't convert event of type '" + event.getType() + "' to DTO");
+                throw new IllegalStateException("Can't convert event to dto, event type '" + event.getType() + "' is unknown");
+        }
+    }
+
+    /** An abstraction that allows to switch message sender backend. */
+    @VisibleForTesting
+    interface MessageSender {
+
+        /**
+         * Sends a given text message to a given channel.
+         *
+         * @param channel
+         *         channel to send message to
+         * @param message
+         *         message to send
+         * @throws Exception
+         *         when any error occurs
+         */
+        void sendMessage(String channel, String message) throws Exception;
+    }
+
+    private static class WebsocketMessageSender implements MessageSender {
+        @Override
+        public void sendMessage(String channel, String message) throws Exception {
+            ChannelBroadcastMessage cbm = new ChannelBroadcastMessage();
+            cbm.setBody(message);
+            cbm.setChannel(channel);
+            WSConnectionContext.sendMessage(cbm);
         }
     }
 }
