@@ -54,6 +54,6 @@ public abstract class SystemServiceEvent implements SystemEvent {
 
     @Override
     public String toString() {
-        return getClass() + "{evenType='" + getType() + "', serviceName='" + serviceName + "'}";
+        return getClass().getSimpleName() + "{evenType='" + getType() + "', serviceName=" + serviceName + "'}";
     }
 }
