@@ -11,8 +11,9 @@
 package org.eclipse.che.api.system.shared.dto;
 
 import org.eclipse.che.api.system.shared.event.service.SystemServiceEvent;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.dto.shared.DelegateRule;
+import org.eclipse.che.dto.shared.DelegateTo;
 
 /**
  * DTO for system service events.
@@ -22,14 +23,6 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface SystemServiceEventDto extends SystemEventDto {
 
-    /** Creates a new dto from given event. */
-    static SystemServiceEventDto fromEvent(SystemServiceEvent event) {
-        SystemServiceEventDto dto = DtoFactory.newDto(SystemServiceEventDto.class);
-        dto.setService(event.getServiceName());
-        dto.setType(event.getType());
-        return dto;
-    }
-
     /**
      * Returns the name of the service described by this event.
      */
@@ -38,4 +31,8 @@ public interface SystemServiceEventDto extends SystemEventDto {
     void setService(String service);
 
     SystemServiceEventDto withService(String service);
+
+    @DelegateTo(client = @DelegateRule(type = DtoConverter.class, method = "copy"),
+                server = @DelegateRule(type = DtoConverter.class, method = "copy"))
+    SystemServiceEventDto copy(SystemServiceEvent event);
 }

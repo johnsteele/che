@@ -13,8 +13,9 @@ package org.eclipse.che.api.system.shared.dto;
 import org.eclipse.che.api.system.shared.event.EventType;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.dto.shared.DelegateRule;
+import org.eclipse.che.dto.shared.DelegateTo;
 
 /**
  * See {@link EventType#SERVICE_ITEM_STOPPED} for details.
@@ -23,17 +24,6 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface SystemServiceItemStoppedEventDto extends SystemServiceEventDto {
-
-    /** Creates dto from event. */
-    static SystemServiceItemStoppedEventDto fromEvent(SystemServiceItemStoppedEvent event) {
-        SystemServiceItemStoppedEventDto dto = DtoFactory.newDto(SystemServiceItemStoppedEventDto.class);
-        dto.setService(event.getServiceName());
-        dto.setType(event.getType());
-        dto.setCurrent(event.getCurrent());
-        dto.setTotal(event.getTotal());
-        dto.setItem(event.getItem());
-        return dto;
-    }
 
     /**
      * Returns an item for which this event is published(like workspace id).
@@ -66,4 +56,8 @@ public interface SystemServiceItemStoppedEventDto extends SystemServiceEventDto 
     void setTotal(Integer total);
 
     SystemServiceItemStoppedEventDto withTotal(Integer total);
+
+    @DelegateTo(client = @DelegateRule(type = DtoConverter.class, method = "copy"),
+                server = @DelegateRule(type = DtoConverter.class, method = "copy"))
+    SystemServiceItemStoppedEventDto copy(SystemServiceItemStoppedEvent event);
 }

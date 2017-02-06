@@ -13,8 +13,9 @@ package org.eclipse.che.api.system.shared.dto;
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.api.system.shared.SystemStatus;
 import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.dto.shared.DelegateRule;
+import org.eclipse.che.dto.shared.DelegateTo;
 
 /**
  * DTO for {@link SystemStatusChangedEvent}.
@@ -24,15 +25,6 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 @EventOrigin("system")
 public interface SystemStatusChangedEventDto extends SystemEventDto {
-
-    /** Creates dto from event. */
-    static SystemStatusChangedEventDto fromEvent(SystemStatusChangedEvent event) {
-        SystemStatusChangedEventDto dto = DtoFactory.newDto(SystemStatusChangedEventDto.class);
-        dto.setType(event.getType());
-        dto.setStatus(event.getStatus());
-        dto.setPrevStatus(event.getPrevStatus());
-        return dto;
-    }
 
     /** Returns new status of the system. */
     SystemStatus getStatus();
@@ -47,4 +39,8 @@ public interface SystemStatusChangedEventDto extends SystemEventDto {
     void setPrevStatus(SystemStatus prevStatus);
 
     SystemStatusChangedEventDto withPrevStatus(SystemStatus prevStatus);
+
+    @DelegateTo(client = @DelegateRule(type = DtoConverter.class, method = "copy"),
+                server = @DelegateRule(type = DtoConverter.class, method = "copy"))
+    SystemStatusChangedEventDto copy(SystemStatusChangedEvent event);
 }

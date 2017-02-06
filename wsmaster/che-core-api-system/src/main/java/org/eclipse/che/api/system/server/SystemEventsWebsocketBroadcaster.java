@@ -67,12 +67,12 @@ public class SystemEventsWebsocketBroadcaster implements EventSubscriber<SystemE
     private static SystemEventDto asDto(SystemEvent event) {
         switch (event.getType()) {
             case STATUS_CHANGED:
-                return SystemStatusChangedEventDto.fromEvent((SystemStatusChangedEvent)event);
+                return DtoFactory.newDto(SystemStatusChangedEventDto.class).copy((SystemStatusChangedEvent)event);
             case SERVICE_ITEM_STOPPED:
-                return SystemServiceItemStoppedEventDto.fromEvent((SystemServiceItemStoppedEvent)event);
+                return DtoFactory.newDto(SystemServiceItemStoppedEventDto.class).copy((SystemServiceItemStoppedEvent)event);
             case SERVICE_STOPPED:
             case STOPPING_SERVICE:
-                return SystemServiceEventDto.fromEvent((SystemServiceEvent)event);
+                return DtoFactory.newDto(SystemServiceEventDto.class).copy((SystemServiceEvent)event);
             default:
                 throw new IllegalStateException("Can't convert event to dto, event type '" + event.getType() + "' is unknown");
         }

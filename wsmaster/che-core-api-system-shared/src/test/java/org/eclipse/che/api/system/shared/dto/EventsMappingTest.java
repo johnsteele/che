@@ -13,8 +13,10 @@ package org.eclipse.che.api.system.shared.dto;
 import org.eclipse.che.api.system.shared.event.EventType;
 import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
 import org.eclipse.che.api.system.shared.event.service.StoppingSystemServiceEvent;
+import org.eclipse.che.api.system.shared.event.service.SystemServiceEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
 import org.eclipse.che.api.system.shared.event.service.SystemServiceStoppedEvent;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.testng.annotations.Test;
 
 import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
@@ -32,7 +34,7 @@ public class EventsMappingTest {
     public void mapsSystemStatusChangedEvent() {
         SystemStatusChangedEvent event = new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN);
 
-        SystemStatusChangedEventDto dto = SystemStatusChangedEventDto.fromEvent(event);
+        SystemStatusChangedEventDto dto = DtoFactory.newDto(SystemStatusChangedEventDto.class).copy(event);
 
         assertEquals(dto.getType(), EventType.STATUS_CHANGED);
         assertEquals(dto.getPrevStatus(), event.getPrevStatus());
@@ -43,7 +45,7 @@ public class EventsMappingTest {
     public void mapsSystemServiceStoppingEvent() {
         StoppingSystemServiceEvent event = new StoppingSystemServiceEvent("service1");
 
-        SystemServiceEventDto dto = SystemServiceEventDto.fromEvent(event);
+        SystemServiceEventDto dto = DtoFactory.newDto(SystemServiceEventDto.class).copy(event);
 
         assertEquals(dto.getType(), EventType.STOPPING_SERVICE);
         assertEquals(dto.getService(), event.getServiceName());
@@ -53,7 +55,7 @@ public class EventsMappingTest {
     public void mapsSystemServiceStoppedEvent() {
         SystemServiceStoppedEvent event = new SystemServiceStoppedEvent("service1");
 
-        SystemServiceEventDto dto = SystemServiceEventDto.fromEvent(event);
+        SystemServiceEventDto dto = DtoFactory.newDto(SystemServiceEventDto.class).copy(event);
 
         assertEquals(dto.getType(), EventType.SERVICE_STOPPED);
         assertEquals(dto.getService(), event.getServiceName());
@@ -63,7 +65,7 @@ public class EventsMappingTest {
     public void mapsSystemServiceItemStoppedEvent() {
         SystemServiceItemStoppedEvent event = new SystemServiceItemStoppedEvent("service1", "workspace1", 3, 5);
 
-        SystemServiceItemStoppedEventDto dto = SystemServiceItemStoppedEventDto.fromEvent(event);
+        SystemServiceItemStoppedEventDto dto = DtoFactory.newDto(SystemServiceItemStoppedEventDto.class).copy(event);
 
         assertEquals(dto.getType(), EventType.SERVICE_ITEM_STOPPED);
         assertEquals(dto.getService(), event.getServiceName());

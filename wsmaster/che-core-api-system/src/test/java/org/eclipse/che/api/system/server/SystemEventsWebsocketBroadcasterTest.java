@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2017 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.che.api.system.server;
 
 import org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.MessageSender;
@@ -78,10 +88,10 @@ public class SystemEventsWebsocketBroadcasterTest {
         SystemServiceStoppedEvent serviceStopped = new SystemServiceStoppedEvent("service1");
         SystemServiceItemStoppedEvent itemStopped = new SystemServiceItemStoppedEvent("service1", "item1", 5, 10);
         return new Object[][] {
-                {statusChanged, SystemStatusChangedEventDto.fromEvent(statusChanged)},
-                {stoppingService, SystemServiceEventDto.fromEvent(stoppingService)},
-                {serviceStopped, SystemServiceEventDto.fromEvent(serviceStopped)},
-                {itemStopped, SystemServiceItemStoppedEventDto.fromEvent(itemStopped)}
+                {statusChanged, DtoFactory.newDto(SystemStatusChangedEventDto.class).copy(statusChanged)},
+                {stoppingService, DtoFactory.newDto(SystemServiceEventDto.class).copy(stoppingService)},
+                {serviceStopped, DtoFactory.newDto(SystemServiceEventDto.class).copy(serviceStopped)},
+                {itemStopped, DtoFactory.newDto(SystemServiceItemStoppedEventDto.class).copy(itemStopped)}
         };
     }
 }
