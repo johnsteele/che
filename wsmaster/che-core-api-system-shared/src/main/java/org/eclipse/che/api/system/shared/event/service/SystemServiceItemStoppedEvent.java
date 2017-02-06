@@ -91,6 +91,8 @@ public class SystemServiceItemStoppedEvent extends SystemServiceEvent {
                "item='" + item + '\'' +
                ", total=" + total +
                ", current=" + current +
-               "} " + super.toString();
+               ", evenType='" + getType() + '\'' +
+               ", service='" + getServiceName() +
+               "\'}";
     }
 }
